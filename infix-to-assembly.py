@@ -2,6 +2,20 @@
 # coding: utf-8
 
 def find_first_parenthesis_block(text: str) -> (int, int):
+    """
+    Return the beginning and ending indexes of the first complete parenthesis block.
+
+    Parameters
+    ----------
+    text : str
+        infix string.
+
+    Returns
+    -------
+    (int, int)
+        beginning, ending.
+
+    """
     start_of_parenthesis_block = None
     end_of_parenthesis_block = None
     count_parenthesis = 0
@@ -20,9 +34,36 @@ def find_first_parenthesis_block(text: str) -> (int, int):
     return start_of_parenthesis_block, end_of_parenthesis_block
 
 def ishex(char: chr) -> bool:
+    """
+    Return whether the char is a legitimate hex digit or not.
+
+    Parameters
+    ----------
+    char : chr
+        character to be tested.
+
+    Returns
+    -------
+    bool
+        true if character is a legitimate hex digit, else false.
+
+    """
     return char.isdigit() or char in "abcdef"
 
 def find_first_number_block(text: str) -> (int, int):
+    """
+    Return the beginning and ending indexes of the first complete number block.
+
+    Parameters
+    ----------
+    text : str
+        infix string.
+
+    Returns
+    -------
+    (int, int)
+        beginning, ending.
+    """
     start_of_number_block = None
     end_of_number_block = None
     for i, char in enumerate(text):
@@ -37,6 +78,22 @@ def find_first_number_block(text: str) -> (int, int):
     return start_of_number_block, end_of_number_block
 
 def find_first_block(text: str) -> (int, int, str):
+    """
+    Return the beginning, ending indexes and type of the first complete block.
+    
+    Type of block is either 'number', 'parenthesis' or 'operator'.
+
+    Parameters
+    ----------
+    text : str
+        infix string.
+
+    Returns
+    -------
+    (int, int, str)
+        beginning, ending, type of block(number, parenthesis or operator).
+
+    """
     initial = text[0]
     if ishex(initial):
         start, end = find_first_number_block(text)
@@ -50,6 +107,23 @@ def find_first_block(text: str) -> (int, int, str):
     return start, end, typee
 
 def text_to_parts(text: str) -> list:
+    """
+    Return a list of strings of mathematical blocks.
+    
+    Split the text into blocks of numbers, parenthesis blocks and operators
+    and return them in a list.
+
+    Parameters
+    ----------
+    text : str
+        infix string.
+
+    Returns
+    -------
+    list
+        list of strings of mathematical blocks.
+
+    """
     parts = []
     first_block_start, first_block_end, typee = find_first_block(text)
     parts.append(text[first_block_start : first_block_end + 1])
@@ -59,7 +133,25 @@ def text_to_parts(text: str) -> list:
     parts += text_to_parts(text[first_block_end + 2 : ])
     return parts
 
-def group_operations(text: str) -> list:    
+def group_operations(text: str) -> list:
+    """
+    Return a list of strings of mathematical blocks, considering order of operations.
+    
+    Split the text into blocks of numbers, parenthesis blocks and operators
+    and return them in a list, while considering the order of operations for strings 
+    with multiple operators in the same block.
+
+    Parameters
+    ----------
+    text : str
+        infix string.
+
+    Returns
+    -------
+    list
+        list of strings of mathematical blocks.
+
+    """
     
     parts = text_to_parts(text)
     
@@ -87,6 +179,20 @@ def group_operations(text: str) -> list:
     return parts
 
 def infix_to_postfix(text: str) -> list:
+    """
+    Return a list of postfix instructions from an infix string.
+
+    Parameters
+    ----------
+    text : str
+        infix string.
+
+    Returns
+    -------
+    list
+        list of strings of postfix instructions.
+
+    """
     
     def unfold_block(text: str) -> list:
         return infix_to_postfix(text) if text[0] == "(" else [text]
@@ -99,6 +205,20 @@ def infix_to_postfix(text: str) -> list:
     return stack
 
 def infix_to_assembly(formula: str) -> str:
+    """
+    Return an assembly code block which calculates the result of the infix string.
+
+    Parameters
+    ----------
+    formula : str
+        infix string.
+
+    Returns
+    -------
+    str
+        assembly code.
+
+    """
     asm = ""
     postfix = infix_to_postfix(formula)
     for value in postfix:
@@ -127,7 +247,21 @@ def infix_to_assembly(formula: str) -> str:
             asm += "\npush 0" + value + "h"
     return asm
 
-def create_complete_assembly_code(formula: str):
+def create_complete_assembly_code(formula: str) -> str:
+    """
+    Return an assembly code block which calculates and prints the result of an infix string.
+
+    Parameters
+    ----------
+    formula : str
+        infix string.
+
+    Returns
+    -------
+    str
+        assembly code.
+
+    """
     asm = "org 100h\n"
     asm += infix_to_assembly(formula)
     asm += """\n
@@ -193,11 +327,30 @@ end_print_routine:
 """
     return asm
 
-# print(create_complete_assembly_code("2*(b+1)/2+10+fa00"))
-
 import re
 
 def check_formula_and_create_assembly_code(formula: str) -> str:
+    """
+    Return an assembly code block which calculates and prints the result of an infix string.
+    
+    If the formula is not legitimate, print warning.
+
+    Parameters
+    ----------
+    formula : str
+        DESCRIPTION.
+
+    Raises
+    ------
+    Exception
+        DESCRIPTION.
+
+    Returns
+    -------
+    str
+        DESCRIPTION.
+
+    """
     formula = re.sub(r"(?is)[^0-9a-f+*/\-()]", "", formula)
     # print (formula)
     try:
@@ -207,10 +360,6 @@ def check_formula_and_create_assembly_code(formula: str) -> str:
         asm = "Please check your formula for errors!"
         raise Exception(asm)
     return asm
-
-# print(check_formula_and_create_assembly_code("2*(b+1/2+10+fa00"))
-
-# print(check_formula_and_create_assembly_code("2*(b+1)/2+10+fa00"))
 
 import sys
 
@@ -231,6 +380,14 @@ class bcolors:
         self.ENDC = ''
         
 def print_help():
+    """
+    Print help.
+
+    Returns
+    -------
+    None.
+
+    """
     print(bcolors.OKBLUE, "    ", "="*80, bcolors.ENDC, sep="")
     print("""    HELP
     
@@ -241,6 +398,14 @@ def print_help():
     print(bcolors.OKBLUE, "    ", "="*80, bcolors.ENDC, sep="", end="\n\n")
 
 def cli():
+    """
+    Print the assembly code of the infix formula to the terminal.
+
+    Returns
+    -------
+    None.
+
+    """
     print_help()
     while True:
         formula = input('Please enter formula (or type "exit"):\n')
@@ -259,6 +424,19 @@ def cli():
 import os
 
 def handle_file(path: str):
+    """
+    Save the assembly code of the infix "file" to "file.asm".
+
+    Parameters
+    ----------
+    path : str
+        infix .
+
+    Returns
+    -------
+    None.
+
+    """
     try:
         with open(path) as f:
             formula = f.read()
