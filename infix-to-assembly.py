@@ -175,7 +175,7 @@ def group_operations(text: str) -> list:
     
     modify_list_group_by("*/")
     modify_list_group_by("+-")
-    
+
     return parts
 
 def infix_to_postfix(text: str) -> list:
@@ -196,12 +196,17 @@ def infix_to_postfix(text: str) -> list:
     
     def unfold_block(text: str) -> list:
         return infix_to_postfix(text) if text[0] == "(" else [text]
-    
-    grouped = group_operations(text)[0][1:-1]
-    first_block, operator, second_block = text_to_parts(grouped)
-    first_block = unfold_block(first_block)
-    second_block = unfold_block(second_block)
-    stack = [*first_block, *second_block, operator]
+
+    grouped_raw = group_operations(text)[0]
+    if not ("+" in grouped_raw or "-" in grouped_raw or "*" in grouped_raw or "/" in grouped_raw):
+        grouped = grouped_raw
+        stack = [grouped]
+    else:
+        grouped = group_operations(text)[0][1:-1]
+        first_block, operator, second_block = text_to_parts(grouped)
+        first_block = unfold_block(first_block)
+        second_block = unfold_block(second_block)
+        stack = [*first_block, *second_block, operator]
     return stack
 
 def infix_to_assembly(formula: str) -> str:
@@ -244,7 +249,11 @@ def infix_to_assembly(formula: str) -> str:
             asm += "\ndiv bx"
             asm += "\npush ax"
         else:
-            asm += "\npush 0" + value + "h"
+            # asm += "\npush 0" + value + "h"
+            # the line above is commented out as the emulator has a bug
+            # which pushes immediate 0bbh as 0ffbbh to the stack
+            asm += "\nmov cx, 0" + value + "h"
+            asm += "\npush cx"
     return asm
 
 def create_complete_assembly_code(formula: str) -> str:
